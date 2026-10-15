@@ -81,6 +81,23 @@ def list_projects(team: str = "") -> str:
         return f"'{team}' 팀의 프로젝트가 없습니다."
     return json.dumps(rows, ensure_ascii=False, indent=2)
 
+# mcp_server.py 에 추가
+
+# Resource: URI 기반 데이터. 도구는 "호출"이고 리소스는 "읽기"
+@mcp.resource("employees://{employee_id}")
+def get_employee_resource(employee_id: str) -> str:
+    """직원 상세 정보를 URI로 제공한다. 예: employees://1"""
+    emp = next((e for e in EMPLOYEES if e["id"] == int(employee_id)), {})
+    return json.dumps(emp, ensure_ascii=False)
+
+# Prompt: 미리 정의된 프롬프트 템플릿. 클라이언트가 명령 형태로 노출 가능
+@mcp.prompt()
+def asset_report(team: str) -> str:
+    """팀별 자산 현황 보고서 작성용 프롬프트."""
+    return f"""{team}의 자산 현황을 조사해 보고서를 작성하세요.
+1. search_employee로 팀원을 확인하고
+2. get_asset으로 팀원별 자산을 조회하고
+3. 유형별 수량을 표로 정리하고 재고 자산이 있으면 배정 제안을 덧붙이세요."""
 
 if __name__ == "__main__":
     mcp.run()   # stdio 모드로 실행
